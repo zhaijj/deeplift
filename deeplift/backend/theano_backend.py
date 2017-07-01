@@ -148,7 +148,8 @@ def conv2d(inp, filters, border_mode, subsample):
         #dimensions as input
         border_mode=BorderMode.half
         assert filters.shape[2]%2 == 1 and filters.shape[3]%2 == 1,\
-            "haven't handled even filter shapes for border mode 'half'"
+            ("haven't handled even filter shapes for border mode 'half'; "
+             +"filter shapes are "+str(filters.shape))
     return T.nnet.conv2d(input=inp,
                          filters=T.cast(theano.shared(value=filters),
                                         dtype=theano.config.floatX),
