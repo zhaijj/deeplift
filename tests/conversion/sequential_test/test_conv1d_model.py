@@ -32,7 +32,8 @@ class TestConv1DModel(unittest.TestCase):
                         #axis last; this is actually due to the bug
                         #that seems to date back to v0.2.0...
                         #https://github.com/fchollet/keras/blob/0.2.0/keras/layers/convolutional.py#L88
-                        activation="relu", input_shape=(51,10))
+                        activation="relu", input_shape=(51,10),
+                        border_mode="same")
         self.keras_model.add(conv_layer)
         self.keras_model.add(keras.layers.convolutional.MaxPooling1D(
                              pool_length=4, stride=2)) 
