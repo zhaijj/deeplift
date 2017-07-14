@@ -144,27 +144,43 @@ def abs(inp):
 def conv2d(inp, filters, border_mode, subsample):
     inp = T.cast(inp, dtype=theano.config.floatX) 
     if (border_mode==BorderMode.same):
-        #'half' kernel width padding results in outputs of the same
-        #dimensions as input
         border_mode=BorderMode.half
-       # assert filters.shape[2]%2 == 1 and filters.shape[3]%2 == 1,\
-       #     ("haven't handled even filter shapes for border mode 'half'; "
-       #      +"filter shapes are "+str(filters.shape))
-    return T.nnet.conv2d(input=inp,
+    to_return = T.nnet.conv2d(input=inp,
                          filters=T.cast(theano.shared(value=filters),
                                         dtype=theano.config.floatX),
                          border_mode=border_mode,
                          subsample=subsample,
                          filter_shape=filters.shape)
 
+    if (border_mode==BorderMode.half):
+        if (filters.shape[2]%2==0):
+            T.floor((inp.shape[2]+subsample[0]-1)/subsample[0])
+            to_return = to_return[:, :,
+                    :(inp.shape[2]+subsample[0]-1)//subsample[0], :]
+        if (filters.shape[3]%2==0):
+            to_return = to_return[:, :, :,
+                        :(inp.shape[3]+subsample[1]-1)//subsample[1]]
+
+    return to_return
+
 
 def conv2d_grad(topgrad, output_shape, filters, border_mode, strides):
     if (border_mode==BorderMode.same):
-        #'half' kernel width padding results in outputs of the same
-        #dimensions as input
         border_mode=BorderMode.half
        # assert filters.shape[2]%2 == 1 and filters.shape[3]%2 == 1,\
        #     "haven't handled even filter shapes for border mode 'half'"
+    if (border_mode==BorderMode.half):
+        if (filters.shape[2]%2==0):
+            #pad with extra zeros as necessary
+            if (output_shape[2]%strides[0]==0):
+                topgrad = T.concatenate([topgrad, 
+                            T.zeros((topgrad.shape[0],
+                             topgrad.shape[1],1,topgrad.shape[3]))], axis=2)
+            if (output_shape[3]%strides[1]==0):
+                topgrad = T.concatenate([topgrad, 
+                            T.zeros((topgrad.shape[0],
+                             topgrad.shape[1],topgrad.shape[2],1))], axis=3)
+            
     op = T.nnet.abstract_conv.AbstractConv2d_gradInputs(
             imshp=output_shape,
             kshp=filters.shape,

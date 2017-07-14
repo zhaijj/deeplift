@@ -107,10 +107,10 @@ class TestConv(unittest.TestCase):
        # 0+-1+0+5 = 4 - bias (1.0) = 3
         np.testing.assert_almost_equal(func(self.inp),
                                np.array(
-                               [[[ 3, 19, 17, 15, 9],
-                                 [-3,-19,-17,-15,-9]],
-                                [[ 3, 3, 1,-1,-7],
-                                 [-3,-3,-1, 1, 7]]]))
+                               [[[ 3, 19, 17, 15],
+                                 [-3,-19,-17,-15]],
+                                [[ 3, 3, 1,-1],
+                                 [-3,-3,-1, 1]]]))
         
         
     def test_fprop_pos_and_neg_contribs(self): 
