@@ -249,7 +249,6 @@ def pool2d_grad(out_grad, pool_in,
                            "'same' yet")
     padding, theano_pool_mode = get_pooling_padding_and_theano_pool_mode(
                                     pool_size, border_mode, pool_mode)
-    print(theano_version)
     if (theano_version >= LooseVersion('0.9')): #API breaking change
 
         inp = [pool_in, pool_size, strides, padding]
