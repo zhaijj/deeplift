@@ -461,11 +461,12 @@ class Pool1D(SingleInputMixin, Node):
         if (self.channels_come_last):
             input_shape = [input_shape[0], input_shape[2], input_shape[1]]
         shape_to_return = [None, input_shape[1]] #num channels unchanged 
-        if (self.border_mode != B.BorderMode.valid):
-            raise RuntimeError("Please implement shape inference for"
-                               " border mode: "+str(self.border_mode))
-        shape_to_return.append(
-            1+int((input_shape[2]-self.pool_length)/self.stride)) 
+        if (self.border_mode == B.BorderMode.same):
+            shape_to_return.append(
+                int((input_shape[2]+self.stride-1)/self.stride)) 
+        elif (self.border_mode == B.BorderMode.valid): 
+            shape_to_return.append(
+                1+int((input_shape[2]-self.pool_length)/self.stride)) 
         if (self.channels_come_last):
             shape_to_return = [shape_to_return[0], shape_to_return[2],
                                shape_to_return[1]]

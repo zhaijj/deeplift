@@ -30,7 +30,7 @@ class TestConvolutionalModel(unittest.TestCase):
         conv_layer = keras.layers.convolutional.Convolution2D(
                         nb_filter=2, nb_row=4, nb_col=4, subsample=(2,2),
                         activation="relu", input_shape=(10,51,51),
-                        dim_ordering='th')
+                        dim_ordering='th', border_mode='same')
         self.keras_model.add(conv_layer)
         if (self.keras_version > 0.2):
             self.keras_model.add(keras.layers.convolutional.MaxPooling2D(
