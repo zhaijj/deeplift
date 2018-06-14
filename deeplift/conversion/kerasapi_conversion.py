@@ -419,7 +419,8 @@ def convert_sequential_model(
     dense_mxts_mode=DenseMxtsMode.Linear,
     conv_mxts_mode=ConvMxtsMode.Linear,
     maxpool_deeplift_mode=default_maxpool_deeplift_mode,
-    layer_overrides={}):
+    layer_overrides={},
+    custom_conversion_funcs={}):
 
     if (verbose):
         print("nonlinear_mxts_mode is set to: "
@@ -452,7 +453,8 @@ def sequential_container_conversion(config,
                                     conv_mxts_mode,
                                     maxpool_deeplift_mode,
                                     converted_layers=None,
-                                    layer_overrides={}):
+                                    layer_overrides={},
+                                    custom_conversion_funcs={}):
     if (converted_layers is None):
         converted_layers = []
     name_prefix=name
@@ -467,8 +469,12 @@ def sequential_container_conversion(config,
                 if mode in layer_overrides[layer_idx]:
                     modes_to_pass[mode] = layer_overrides[layer_idx][mode] 
         if (layer_config["class_name"] != "InputLayer"):
-            conversion_function = layer_name_to_conversion_function(
-                                   layer_config["class_name"])
+            if layer_config["class_name"] in custom_conversion_funcs:
+                conversion_function = custom_conversion_funcs[
+                                        layer_config["class_name"]]
+            else:
+                conversion_function = layer_name_to_conversion_function(
+                                       layer_config["class_name"])
             converted_layers.extend(conversion_function(
                                  config=layer_config["config"],
                                  name=(name_prefix+"-" if name_prefix != ""
@@ -503,6 +509,7 @@ def functional_container_conversion(config,
                                     conv_mxts_mode,
                                     maxpool_deeplift_mode,
                                     layer_overrides,
+                                    custom_conversion_funcs,
 
                                     outer_inbound_node_infos=None,
                                     node_id_to_deeplift_layers=None,
@@ -549,8 +556,12 @@ def functional_container_conversion(config,
 
     for layer_config in config["layers"]:
 
-        conversion_function = layer_name_to_conversion_function(
-                               layer_config["class_name"])
+        if layer_config["class_name"] in custom_conversion_funcs:
+            conversion_function = custom_conversion_funcs[
+                                    layer_config["class_name"]]
+        else:
+            conversion_function = layer_name_to_conversion_function(
+                                    layer_config["class_name"])
 
         #We need to deal with the case of shared layers, i.e. the same
         # parameters are repeated across multiple layers. In the keras
@@ -783,19 +794,21 @@ def convert_functional_model(
     dense_mxts_mode=DenseMxtsMode.Linear,
     conv_mxts_mode=ConvMxtsMode.Linear,
     maxpool_deeplift_mode=default_maxpool_deeplift_mode,
-    layer_overrides={}):
+    layer_overrides={},
+    custom_conversion_funcs={}):
 
     if (verbose):
         print("nonlinear_mxts_mode is set to: "+str(nonlinear_mxts_mode))
 
     converted_model_container = functional_container_conversion(
-                                config=model_config,
-                                name="", verbose=verbose,
-                                nonlinear_mxts_mode=nonlinear_mxts_mode,
-                                dense_mxts_mode=dense_mxts_mode,
-                                conv_mxts_mode=conv_mxts_mode,
-                                maxpool_deeplift_mode=maxpool_deeplift_mode,
-                                layer_overrides=layer_overrides)
+                            config=model_config,
+                            name="", verbose=verbose,
+                            nonlinear_mxts_mode=nonlinear_mxts_mode,
+                            dense_mxts_mode=dense_mxts_mode,
+                            conv_mxts_mode=conv_mxts_mode,
+                            maxpool_deeplift_mode=maxpool_deeplift_mode,
+                            layer_overrides=layer_overrides,
+                            custom_conversion_funcs=custom_conversion_funcs)
 
     for output_layer in converted_model_container.output_layers:
         output_layer.build_fwd_pass_vars()
