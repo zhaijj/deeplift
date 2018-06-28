@@ -3,7 +3,7 @@
 FILE="sequences.simdata.gz"
 if [ ! -f "$FILE" ]
 then
-    wget https://raw.githubusercontent.com/AvantiShri/model_storage/5d2e2bffd66675fe9d26fdad2454a7faf6303a60/deeplift/genomics/keras2_conv1d_record_5_model_PQzyq_modelJson.json
+    wget https://raw.githubusercontent.com/AvantiShri/model_storage/db919b12f750e5844402153233249bb3d24e9e9a/deeplift/genomics/sequences.simdata.gz
 else
     echo "File sequences.simdata.gz exists already"
 fi
